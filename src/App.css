@@ -1,9 +1,13 @@
+/* APP.js */
 #App {
   height: 100vh;
   width: 100vw;
   display: flex;
   justify-content: center;
   align-items: center;
+}
+#right-wrapper {
+  padding: 2%;
 }
 
 
@@ -18,7 +22,7 @@
   border: 1px solid black;
   font-size: 5vw;
   text-align: center;
-  cursor: crosshair;
+  cursor: default;
 }
 .selected {
   /* border: 1px solid lightcoral; */
