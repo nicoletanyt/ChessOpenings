@@ -23,20 +23,8 @@ export const startingBoard = [
     ["wp", "wp", "wp", "wp", "wp", "wp", "wp", "wp"],
     ["wr", "wn", "wb", "wq", "wk", "wb", "wn", "wr"],
 ]
-
-const movements = {
-    "wk": [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (1, 1), (-1, 1), (1, -1)],
-    "wq": [],
-    "wr": [],
-    "wb": [],
-    "wn": [],
-    "wp": [],
-    "bk": [],
-    "bq": [],
-    "br": [],
-    "bb": [],
-    "bn": [],
-    "bp": [],
+function deepClone(array) {
+    return Array.from(array).map(element => element.cloneNode(true))
 }
 
 export function isLegal(pieceId, currentPos, previousPos) {
@@ -81,13 +69,15 @@ export function isLegal(pieceId, currentPos, previousPos) {
     }
 }
 
-export function isOccupied(currentPos, previousPos, currentPlayer) {
-    const board = document.querySelectorAll(".cell")
+export function isOccupied(currentPos, previousPos, currentPlayer, prevPieceId, board) {
+    // const board = document.querySelectorAll(".cell")
     const pieceId = board[currentPos[0] * 8 + currentPos[1]].getAttribute("pieceId")
     let obstruction = false
     let displacement = [currentPos[0] - previousPos[0], currentPos[1] - previousPos[1]]
 
-    let previousPiece = board[previousPos[0] * 8 + previousPos[1]].getAttribute("pieceId")[1]
+    let previousPiece
+    if (prevPieceId == undefined) previousPiece = board[previousPos[0] * 8 + previousPos[1]].getAttribute("pieceId")[1]
+    else previousPiece = prevPieceId[1]
     if (previousPiece == "q") {
         // the queen is moving like a rook 
         if (displacement[0] == 0 || displacement[1] == 0) previousPiece = "r"
@@ -109,12 +99,14 @@ export function isOccupied(currentPos, previousPos, currentPlayer) {
                     if (board[i * 8 + currentPos[1]].getAttribute("pieceId") != "") obstruction = true
                 }
             }
+            break
         case "b":
             // get direction of displacement in the 4 directions of a bishop e.g. [-1, 1], [1, -1]
             let direction = [displacement[0] / Math.abs(displacement[0]), displacement[1] / Math.abs(displacement[1])]
             for (let i = 1; i < Math.abs(displacement[0]); ++i) {
                 if (board[(direction[0] * i + previousPos[0]) * 8 + (direction[1] * i + previousPos[1])].getAttribute("pieceId") != "") obstruction = true
             }
+            break
         case "p":
             for (let i = Math.min(currentPos[0], previousPos[0]) + 1; i < Math.max(currentPos[0], previousPos[0]); ++i) {
                 if (board[i * 8 + currentPos[1]].getAttribute("pieceId") != "") obstruction = true
@@ -127,21 +119,86 @@ export function isOccupied(currentPos, previousPos, currentPlayer) {
                 // diagonal, so can take. obstruction if there is no piece at the diagonal square
                 if (pieceId == "") obstruction = true
             }
+            break
     }
-    
+
+    // should return true if nothing is obstructing
     return ((pieceId == "" || pieceId[0] != currentPlayer) && !obstruction)
 }
 
-export function isCheck(pieceId, currentPos, currentPlayer, king) {
-    // check if the new move can capture the king next
-    let kingPos;
-    if (currentPlayer == "w") kingPos = king[1]
-    else kingPos = king[0]
+export function isCheck(pieceId, currentPos, currentPlayer, king, board) {
+    let kingPos = currentPlayer == "w" ? king[0] : king[1];
 
-    // TODO: DOES NOT WORK YET
-
-    if (isLegal(pieceId, kingPos, currentPos)) {
+    // check if this current move results in a check
+    if (isLegal(pieceId, kingPos, currentPos) && isOccupied(kingPos, currentPos, currentPlayer, pieceId, board)) {
         console.log("Check")
+        return true
+    }
+
+    return false
+}
+
+export function isPinned(pieceId, currentPos, previousPos, currentPlayer, king) {
+    let opponentPieces = currentPlayer == "w" ? ["br", "bq", "bb"] : ["wr", "wq", "wb"]
+
+    // make a copy of the board where the piece has moved
+    const board = document.querySelectorAll(".cell")
+    let boardCopy = deepClone(board)
+    boardCopy[previousPos[0] * 8 + previousPos[1]].setAttribute("pieceId", "")
+    boardCopy[currentPos[0] * 8 + currentPos[1]].setAttribute("pieceId", pieceId)
+    
+    // check if in this scenario (where the current piece has moved) will result in a check for all possible opponent pieces
+    for (let i = 0; i < boardCopy.length; ++i) {
+        if (opponentPieces.includes(boardCopy[i].getAttribute("pieceId"))) {
+            if (isCheck(boardCopy[i].getAttribute("pieceId"), [Math.floor(i/8), i%8], currentPlayer == "w" ? "b" : "w", king, boardCopy)) {
+                console.log("Will result in a check => is pinned")
+                return false
+            }
+        }
     }
     return true
+} 
+
+export function checkAll(pieceId, currentPos, previousPos, currentPlayer, king) {
+    const board = document.querySelectorAll(".cell")
+    let opponent = currentPlayer == "w" ? "b" : "w";
+
+    let boardCopy = deepClone(board)
+    boardCopy[previousPos[0] * 8 + previousPos[1]].setAttribute("pieceId", "")
+    boardCopy[currentPos[0] * 8 + currentPos[1]].setAttribute("pieceId", pieceId)
+
+    for (let i = 0; i < boardCopy.length; ++i) {
+        if (boardCopy[i].getAttribute("pieceId")[0] == opponent) {
+            // can be captured
+            if (isCheck(boardCopy[i].getAttribute("pieceId"), [Math.floor(i/8), i%8], opponent, king, boardCopy)) {
+                console.log("There is still an ongoing check.")
+                return true
+            }
+        }
+    }
+    return false
+}
+
+export function checkWin(currentPlayer, king) {
+    let kingPos = currentPlayer == "w" ? king[0] : king[1];
+
+    const board = document.querySelectorAll(".cell")
+
+    // check all moves that the king can make
+    const kingMoves = [[0, 1], [0, -1], [-1, 0], [1, 0], [-1, -1], [-1, 1], [1, 1], [1, -1]]
+    for (let i = 0; i < kingMoves.length; ++i) {
+        let currentPos = [kingPos[0] + kingMoves[i][0], kingPos[1] + kingMoves[i][1]]
+        // checking if position is in bounds
+        if (currentPos[0] >= 0 && currentPos[0] < 8 && currentPos[1] >= 0 && currentPos[1] < 8) {
+            // there is a move where the king isn't checked
+            if (!checkAll(currentPlayer + "k", currentPos, kingPos, currentPlayer, king)) return false
+        }
+    }  
+
+    // check if any other piece can block the check 
+
+
+    // check if any piece can take the piece that is checking
+
+    return true 
 }
