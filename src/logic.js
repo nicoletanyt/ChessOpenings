@@ -116,7 +116,7 @@ export function isOccupied(currentPos, previousPos, currentPlayer, prevPieceId, 
                 if (pieceId != "") obstruction = true 
             } 
             if (displacement[0] != 0 && displacement[1] != 0) {
-                // diagonal, so can take. obstruction if there is no piece at the diagonal square
+                // diagonal, so can take. obstruction if there is no piece at the diagonal square. unless en passant
                 if (pieceId == "") obstruction = true
             }
             break
@@ -201,4 +201,56 @@ export function checkWin(currentPlayer, king) {
     // check if any piece can take the piece that is checking
 
     return true 
+}
+
+function castlingAbility(RKMoved) {
+    let starting = "KQkq" // starting position
+    let rtn = ""
+    for (let i = 0; i < RKMoved.length; ++i) {
+        if (RKMoved[i] == 0) rtn += starting[i]
+    }
+    return rtn
+}
+
+export function getFEN(board, currentPlayer, RKMoved, EPTarget, halfMove, fullMove) {
+    let fen = "", spaceCounter = 0, pieceId = ""
+
+    for (let i = 0; i < board.length; ++i) {
+        pieceId = board[i].getAttribute("pieceId")
+        if (pieceId == "") spaceCounter++
+        else {
+            if (spaceCounter != 0) {
+                fen += spaceCounter.toString()
+                spaceCounter = 0
+            } 
+            if (pieceId[0] == "b") fen += pieceId[1]
+            else fen += pieceId[1].toUpperCase()
+        }
+        if (i % 8 == 7 && i != 63) {
+            if (spaceCounter != 0) {
+                fen += spaceCounter.toString()
+                spaceCounter = 0
+            } 
+            fen += "/"   
+        }
+    }
+
+    fen += " " + currentPlayer
+    fen += " " + castlingAbility(RKMoved)
+    fen += " " + EPTarget
+    fen += " " + halfMove.toString()
+    fen += " " + fullMove.toString()
+
+    return fen
+}
+
+
+export async function stockfish(FEN) {
+    console.log(FEN)
+    const result = fetch("https://stockfish.online/api/s/v2.php" + "?fen=" + FEN + "&depth=15")
+    .then((response) => response.json())
+    .then((res) => {
+        return res
+    })
+    console.log(result)
 }

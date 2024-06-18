@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import "../App.css"
-import { pieces, startingBoard, isLegal, isOccupied, isCheck, isPinned, checkAll, checkWin } from '../logic'
+import { pieces, startingBoard, isLegal, isOccupied, isCheck, isPinned, checkAll } from '../logic'
 
-export default function Board({currentPlayer, setCurrentPlayer, setBlackTaken, setWhiteTaken}) {
+export default function Board({currentPlayer, setCurrentPlayer, setBlackTaken, setWhiteTaken, RKMoved, setRKMoved, EPTarget, setEPTarget, setHalfMove, setFullMove}) {
     // keeps track of the states 
     const [selectedPieces, setSelectedPieces] = useState([]) // sets the [x, y] position of the current selected piece
     const [king, setKing] = useState([[0, 4], [7, 4]]) // b, w
@@ -84,7 +84,46 @@ export default function Board({currentPlayer, setCurrentPlayer, setBlackTaken, s
                             // this piece will be taken 
                             if (currentPlayer == "w") setWhiteTaken(whiteTaken => [...whiteTaken, board[selectedPieces[1][0] * 8 + selectedPieces[1][1]].getAttribute("pieceId")])
                             else setBlackTaken(blackTaken => [...blackTaken, board[selectedPieces[1][0] * 8 + selectedPieces[1][1]].getAttribute("pieceId")])
+                            setHalfMove(0)
+                        } else {
+                            if (board[selectedPieces[0][0] * 8 + selectedPieces[0][1]].getAttribute("pieceId")[1] != "p") {
+                                setHalfMove(halfMove => (halfMove + 1))
+                            } else {
+                                setHalfMove(0)
+                            }
                         }
+
+                        switch(board[selectedPieces[0][0] * 8 + selectedPieces[0][1]].getAttribute("pieceId")) {
+                            case "wk":
+                                if (RKMoved[0] == 0 || RKMoved[1] == 0) setRKMoved(RKMoved => [1, 1, RKMoved[2], RKMoved[3]])
+                                break
+                            case "wr":
+                                // queenside 
+                                if (selectedPieces[0][0] == 0 && RKMoved[1] == 0) setRKMoved(RKMoved => [RKMoved[0], 1, RKMoved[2], RKMoved[3]])
+                                // kingside
+                                else if (selectedPieces[0][0] == 7 && RKMoved[0] == 0) setRKMoved(RKMoved => [1, RKMoved[1], RKMoved[2], RKMoved[3]])
+                                break
+                            case "bk":
+                                if (RKMoved[2] == 0 || RKMoved[3] == 0) setRKMoved(RKMoved => [RKMoved[0], RKMoved[1], 1, 1])
+                                break
+                            case "br":
+                                // queenside 
+                                if (selectedPieces[0][0] == 0 && RKMoved[1] == 0) setRKMoved(RKMoved => [RKMoved[0], RKMoved[1], RKMoved[2], 1])
+                                // kingside
+                                else if (selectedPieces[0][0] == 7 && RKMoved[0] == 0) setRKMoved(RKMoved => [RKMoved[0], RKMoved[1], 1, RKMoved[3]])
+                                break
+                        }
+
+                        if (EPTarget) setEPTarget("-") 
+                        if (board[selectedPieces[0][0] * 8 + selectedPieces[0][1]].getAttribute("pieceId")[1] == "p" && Math.abs(selectedPieces[1][0] - selectedPieces[0][0]) == 2) {
+                            // set en passant target
+                            if (board[selectedPieces[0][0] * 8 + selectedPieces[0][1]].getAttribute("pieceId")[0] == "wp") {
+                                setEPTarget(String.fromCharCode(97 + selectedPieces[1][0]) + "6")
+                            } else {
+                                setEPTarget(String.fromCharCode(97 + selectedPieces[1][0]) + "3")
+                            }
+                        }
+
                         board[selectedPieces[0][0] * 8 + selectedPieces[0][1]].textContent = ""
                         board[selectedPieces[0][0] * 8 + selectedPieces[0][1]].setAttribute("pieceId", "")
     
@@ -95,7 +134,10 @@ export default function Board({currentPlayer, setCurrentPlayer, setBlackTaken, s
                         else if (pieceId == "bk") setKing(king => [selectedPieces[1], king[1]])
     
                         if (currentPlayer == "w") setCurrentPlayer("b")
-                        else setCurrentPlayer("w")
+                        else {
+                            setCurrentPlayer("w")
+                            setFullMove(fullMove => (fullMove + 1))
+                        }
                     }
 
                     // check if the opponent can do anything, else game over
