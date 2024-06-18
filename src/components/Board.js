@@ -145,11 +145,11 @@ export default function Board({currentPlayer, setCurrentPlayer, setBlackTaken, s
 
                         if (secondPieceId != "") {
                             // this piece will be taken if it was not a castle
-                            if (secondPieceId[1] != "r" && pieceId[1] != "k") {
+                            if (!(secondPieceId[1] == "r" && pieceId[1] == "k")) {
                                 if (currentPlayer == "w") setWhiteTaken(whiteTaken => [...whiteTaken, secondPieceId])
                                 else setBlackTaken(blackTaken => [...blackTaken, secondPieceId])
+                                setHalfMove(0)
                             }
-                            setHalfMove(0)
                         } else {
                             if (pieceId[1] != "p") {
                                 setHalfMove(halfMove => (halfMove + 1))

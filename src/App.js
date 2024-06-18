@@ -1,7 +1,7 @@
 import "./App.css";
 import Board from "./components/Board";
 import { useEffect, useState } from "react";
-import { pieces, stockfish, getFEN } from "./logic";
+import { pieces, API, getFEN } from "./logic";
 
 function App() {
   const [currentPlayer, setCurrentPlayer] = useState("w"); // white starts
@@ -11,6 +11,7 @@ function App() {
   const [EPTarget, setEPTarget] = useState("-");
   const [halfMove, setHalfMove] = useState(0);
   const [fullMove, setFullMove] = useState(1);
+  const [response, setResponse] = useState(null);
 
   useEffect(() => {
     const label = document.getElementById("player-display");
@@ -35,6 +36,18 @@ function App() {
     }
     label.textContent = displayStr;
   }, [whiteTaken]);
+
+  useEffect(() => {
+    if (response) {
+      console.log(response);
+      const whiteNext = document.getElementById("white-next")
+      const opening = document.getElementById("opening")
+      
+      whiteNext.textContent = "Most common move for white: " + response.moves[0].uci
+      opening.textContent = "Opening: " + response.opening.name
+    }
+    
+  }, [response]);
 
   return (
     <div id="app">
@@ -68,20 +81,23 @@ function App() {
         <h3 id="player-display">Current Player: </h3>
         <button
           onClick={() => {
-            stockfish(
-              getFEN(
-                document.querySelectorAll(".cell"),
-                currentPlayer,
-                RKMoved,
-                EPTarget,
-                halfMove,
-                fullMove
+              API(
+                getFEN(
+                  document.querySelectorAll(".cell"),
+                  currentPlayer,
+                  RKMoved,
+                  EPTarget,
+                  halfMove,
+                  fullMove
+                ),
+                setResponse
               )
-            );
           }}
         >
           Run Stockfish
         </button>
+        <p id="white-next">Most common move for white: </p>
+        <p id="opening">Current Opening: </p>
       </div>
     </div>
   );

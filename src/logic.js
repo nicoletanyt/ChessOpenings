@@ -264,15 +264,17 @@ export function getFEN(board, currentPlayer, RKMoved, EPTarget, halfMove, fullMo
 }
 
 
-export async function stockfish(FEN) {
+export async function API(FEN, setResponse) {
     console.log(FEN)
-    let endpoint = "https://lichess.org/api/cloud-eval" + "?fen=" + FEN 
+    let endpoint = "https://explorer.lichess.ovh/lichess" + "?fen=" + FEN + "&ratings=1000"
+    // "https://lichess.org/api/cloud-eval" + "?fen=" + FEN 
     // "https://stockfish.online/api/s/v2.php" + "?fen=" + FEN + "&depth=15"
-    const result = fetch(endpoint)
-    .then((response) => response.json())
-    .then((res) => {
-        return res
+    fetch(endpoint)
+    .then((response) => response.json()) 
+    .then((data) => {
+        setResponse(data); 
     })
-
-    console.log(result)
+    .catch((error) => {
+        console.error('Error:', error);
+    });
 }
