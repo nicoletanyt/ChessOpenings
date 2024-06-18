@@ -266,10 +266,13 @@ export function getFEN(board, currentPlayer, RKMoved, EPTarget, halfMove, fullMo
 
 export async function stockfish(FEN) {
     console.log(FEN)
-    const result = fetch("https://stockfish.online/api/s/v2.php" + "?fen=" + FEN + "&depth=15")
+    let endpoint = "https://lichess.org/api/cloud-eval" + "?fen=" + FEN 
+    // "https://stockfish.online/api/s/v2.php" + "?fen=" + FEN + "&depth=15"
+    const result = fetch(endpoint)
     .then((response) => response.json())
     .then((res) => {
         return res
     })
+
     console.log(result)
 }
