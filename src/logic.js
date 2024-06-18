@@ -31,10 +31,12 @@ export function isLegal(pieceId, currentPos, previousPos) {
     // for the checking of some pieces
     let displace_x = Math.abs(currentPos[1] - previousPos[1]) 
     let displace_y = Math.abs(currentPos[0] - previousPos[0]) 
+    const board = document.querySelectorAll(".cell")
+    const secondPieceId = board[currentPos[0] * 8 + currentPos[1]].getAttribute("pieceId")
 
     switch(pieceId) {
         case "wk":
-            return (displace_x <= 1 && displace_y <= 1) 
+            return (displace_x <= 1 && displace_y <= 1) || (secondPieceId == "wr")
         case "wq":
             return (displace_x == 0 && displace_y > 0 || displace_y == 0 & displace_x > 0 || displace_x == displace_y) 
         case "wr":
@@ -50,7 +52,7 @@ export function isLegal(pieceId, currentPos, previousPos) {
             } else if (previousPos[0] - currentPos[0] == 1) return true
             return false
         case "bk":
-            return (displace_x <= 1 && displace_y <= 1) 
+            return (displace_x <= 1 && displace_y <= 1) || (secondPieceId == "br")
         case "bq":
             return (displace_x == 0 && displace_y > 0 || displace_y == 0 & displace_x > 0 || displace_x == displace_y) 
         case "br":
@@ -69,14 +71,14 @@ export function isLegal(pieceId, currentPos, previousPos) {
     }
 }
 
-export function isOccupied(currentPos, previousPos, currentPlayer, prevPieceId, board) {
+export function isOccupied(currentPos, previousPos, currentPlayer, prevPieceId, board, RKMoved) {
     // const board = document.querySelectorAll(".cell")
     const pieceId = board[currentPos[0] * 8 + currentPos[1]].getAttribute("pieceId")
     let obstruction = false
     let displacement = [currentPos[0] - previousPos[0], currentPos[1] - previousPos[1]]
 
     let previousPiece
-    if (prevPieceId == undefined) previousPiece = board[previousPos[0] * 8 + previousPos[1]].getAttribute("pieceId")[1]
+    if (prevPieceId == undefined || prevPieceId.length == 0) previousPiece = board[previousPos[0] * 8 + previousPos[1]].getAttribute("pieceId")[1]
     else previousPiece = prevPieceId[1]
     if (previousPiece == "q") {
         // the queen is moving like a rook 
@@ -120,6 +122,23 @@ export function isOccupied(currentPos, previousPos, currentPlayer, prevPieceId, 
                 if (pieceId == "") obstruction = true
             }
             break
+        case "k":
+            if (pieceId[1] == "r") {
+                let castle;
+                if (currentPos[0] == 0 && currentPos[1] == 0) {
+                    castle = "q"
+                } else if (currentPos[0] == 0 && currentPos[1] == 7) {
+                    castle = "k"
+                } else if (currentPos[0] == 7 && currentPos[1] == 0) {
+                    castle = "Q"
+                } else if (currentPos[0] == 7 && currentPos[1] == 7) {
+                    castle = "K"
+                }
+                // can castle
+                if (castlingAbility(RKMoved).includes(castle)) return true
+            }
+            break
+
     }
 
     // should return true if nothing is obstructing

@@ -43,8 +43,9 @@ export default function Board({currentPlayer, setCurrentPlayer, setBlackTaken, s
 
         if (selectedPieces.length == 2) {
             const pieceId = board[selectedPieces[0][0] * 8 + selectedPieces[0][1]].getAttribute("pieceId")
+            const secondPieceId = board[selectedPieces[1][0] * 8 + selectedPieces[1][1]].getAttribute("pieceId")
             if ((pieceId[0] == currentPlayer)) {
-                if (selectedPieces[0] != selectedPieces[1] && isLegal(pieceId, selectedPieces[1], selectedPieces[0]) && isOccupied(selectedPieces[1], selectedPieces[0], currentPlayer, "", board) && isPinned(pieceId, selectedPieces[1], selectedPieces[0], currentPlayer, king)) {
+                if (selectedPieces[0] != selectedPieces[1] && isLegal(pieceId, selectedPieces[1], selectedPieces[0]) && isOccupied(selectedPieces[1], selectedPieces[0], currentPlayer, "", board, RKMoved) && isPinned(pieceId, selectedPieces[1], selectedPieces[0], currentPlayer, king)) {
                     let validMove = true
                     if (underCheck == currentPlayer) {
                         let tempKing;
@@ -78,22 +79,8 @@ export default function Board({currentPlayer, setCurrentPlayer, setBlackTaken, s
                             else board[king[1][0] * 8 + king[1][1]].classList.add("under-check")
                             setUnderCheck(currentPlayer == "w" ? "b" : "w")
                         }
-    
-                        // move the piece
-                        if (board[selectedPieces[1][0] * 8 + selectedPieces[1][1]].getAttribute("pieceId") != "") {
-                            // this piece will be taken 
-                            if (currentPlayer == "w") setWhiteTaken(whiteTaken => [...whiteTaken, board[selectedPieces[1][0] * 8 + selectedPieces[1][1]].getAttribute("pieceId")])
-                            else setBlackTaken(blackTaken => [...blackTaken, board[selectedPieces[1][0] * 8 + selectedPieces[1][1]].getAttribute("pieceId")])
-                            setHalfMove(0)
-                        } else {
-                            if (board[selectedPieces[0][0] * 8 + selectedPieces[0][1]].getAttribute("pieceId")[1] != "p") {
-                                setHalfMove(halfMove => (halfMove + 1))
-                            } else {
-                                setHalfMove(0)
-                            }
-                        }
 
-                        switch(board[selectedPieces[0][0] * 8 + selectedPieces[0][1]].getAttribute("pieceId")) {
+                        switch(pieceId) {
                             case "wk":
                                 if (RKMoved[0] == 0 || RKMoved[1] == 0) setRKMoved(RKMoved => [1, 1, RKMoved[2], RKMoved[3]])
                                 break
@@ -115,21 +102,62 @@ export default function Board({currentPlayer, setCurrentPlayer, setBlackTaken, s
                         }
 
                         if (EPTarget) setEPTarget("-") 
-                        if (board[selectedPieces[0][0] * 8 + selectedPieces[0][1]].getAttribute("pieceId")[1] == "p" && Math.abs(selectedPieces[1][0] - selectedPieces[0][0]) == 2) {
+                        if (pieceId[1] == "p" && Math.abs(selectedPieces[1][0] - selectedPieces[0][0]) == 2) {
                             // set en passant target
-                            if (board[selectedPieces[0][0] * 8 + selectedPieces[0][1]].getAttribute("pieceId")[0] == "wp") {
+                            if (pieceId[0] == "wp") {
                                 setEPTarget(String.fromCharCode(97 + selectedPieces[1][0]) + "6")
                             } else {
                                 setEPTarget(String.fromCharCode(97 + selectedPieces[1][0]) + "3")
                             }
                         }
 
-                        board[selectedPieces[0][0] * 8 + selectedPieces[0][1]].textContent = ""
-                        board[selectedPieces[0][0] * 8 + selectedPieces[0][1]].setAttribute("pieceId", "")
-    
-                        board[selectedPieces[1][0] * 8 + selectedPieces[1][1]].textContent = pieces[pieceId]
-                        board[selectedPieces[1][0] * 8 + selectedPieces[1][1]].setAttribute("pieceId", pieceId)
-    
+                        // castle & move the piece
+                        if (secondPieceId[1] == "r" && pieceId[1] == "k") {
+                            // castle queenside
+                            if (selectedPieces[1][1] == 0) {
+                                board[selectedPieces[0][0] * 8 + 2].textContent = pieces[pieceId] // king 
+                                board[selectedPieces[0][0] * 8 + 2].setAttribute("pieceId", pieceId) 
+                                // rook
+                                board[selectedPieces[1][0] * 8 + 3].textContent = pieces[secondPieceId]
+                                board[selectedPieces[1][0] * 8 + 3].setAttribute("pieceId", secondPieceId)
+                            } else {
+                                // castle kingside 
+                                board[selectedPieces[0][0] * 8 + 6].textContent = pieces[pieceId]
+                                board[selectedPieces[0][0] * 8 + 6].setAttribute("pieceId", pieceId)
+
+                                board[selectedPieces[1][0] * 8 + 5].textContent = pieces[secondPieceId]
+                                board[selectedPieces[1][0] * 8 + 5].setAttribute("pieceId", secondPieceId)
+                            }
+                            // remove king 
+                            board[selectedPieces[0][0] * 8 + selectedPieces[0][1]].textContent = ""
+                            board[selectedPieces[0][0] * 8 + selectedPieces[0][1]].setAttribute("pieceId", "")
+
+                            // remove rook 
+                            board[selectedPieces[1][0] * 8 + selectedPieces[1][1]].textContent = ""
+                            board[selectedPieces[1][0] * 8 + selectedPieces[1][1]].setAttribute("pieceId", "")
+                        } else {
+                            board[selectedPieces[0][0] * 8 + selectedPieces[0][1]].textContent = ""
+                            board[selectedPieces[0][0] * 8 + selectedPieces[0][1]].setAttribute("pieceId", "")
+        
+                            board[selectedPieces[1][0] * 8 + selectedPieces[1][1]].textContent = pieces[pieceId]
+                            board[selectedPieces[1][0] * 8 + selectedPieces[1][1]].setAttribute("pieceId", pieceId)
+                        }
+
+                        if (secondPieceId != "") {
+                            // this piece will be taken if it was not a castle
+                            if (secondPieceId[1] != "r" && pieceId[1] != "k") {
+                                if (currentPlayer == "w") setWhiteTaken(whiteTaken => [...whiteTaken, secondPieceId])
+                                else setBlackTaken(blackTaken => [...blackTaken, secondPieceId])
+                            }
+                            setHalfMove(0)
+                        } else {
+                            if (pieceId[1] != "p") {
+                                setHalfMove(halfMove => (halfMove + 1))
+                            } else {
+                                setHalfMove(0)
+                            }
+                        }
+
                         if (pieceId == "wk") setKing(king => [king[0], selectedPieces[1]])
                         else if (pieceId == "bk") setKing(king => [selectedPieces[1], king[1]])
     
