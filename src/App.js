@@ -38,13 +38,16 @@ function App() {
   }, [whiteTaken]);
 
   useEffect(() => {
-    if (response) {
+    if (response && currentPlayer == "w") {
       console.log(response);
       const whiteNext = document.getElementById("white-next")
+  
       const opening = document.getElementById("opening")
       
-      whiteNext.textContent = "Most common move for white: " + response.moves[0].uci
-      opening.textContent = "Opening: " + response.opening.name
+      whiteNext.textContent = "Most common move for white: " + response.moves[0].san
+      if (response.opening) {
+        opening.textContent = "Opening: " + response.opening.name
+      }
     }
     
   }, [response]);
@@ -67,8 +70,12 @@ function App() {
           setRKMoved={setRKMoved}
           EPTarget={EPTarget}
           setEPTarget={setEPTarget}
+          halfMove={halfMove}
           setHalfMove={setHalfMove}
+          fullMove={fullMove}
           setFullMove={setFullMove}
+          response={response}
+          setResponse={setResponse}
         />
         <div id="letter-label">
           {"abcdefgh".split("").map((letter) => (

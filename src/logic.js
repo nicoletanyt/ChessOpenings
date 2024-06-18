@@ -163,6 +163,12 @@ export function isPinned(pieceId, currentPos, previousPos, currentPlayer, king) 
     // make a copy of the board where the piece has moved
     const board = document.querySelectorAll(".cell")
     let boardCopy = deepClone(board)
+
+    console.log(boardCopy[previousPos[0] * 8 + previousPos[1]].getAttribute("pieceId"))
+    if (boardCopy[previousPos[0] * 8 + previousPos[1]].getAttribute("pieceId")[1] == "k") {
+        return true
+    }
+
     boardCopy[previousPos[0] * 8 + previousPos[1]].setAttribute("pieceId", "")
     boardCopy[currentPos[0] * 8 + currentPos[1]].setAttribute("pieceId", pieceId)
     
@@ -170,6 +176,7 @@ export function isPinned(pieceId, currentPos, previousPos, currentPlayer, king) 
     for (let i = 0; i < boardCopy.length; ++i) {
         if (opponentPieces.includes(boardCopy[i].getAttribute("pieceId"))) {
             if (isCheck(boardCopy[i].getAttribute("pieceId"), [Math.floor(i/8), i%8], currentPlayer == "w" ? "b" : "w", king, boardCopy)) {
+                console.log(currentPos)
                 console.log("Will result in a check => is pinned")
                 return false
             }
@@ -228,7 +235,8 @@ function castlingAbility(RKMoved) {
     for (let i = 0; i < RKMoved.length; ++i) {
         if (RKMoved[i] == 0) rtn += starting[i]
     }
-    return rtn
+    if (rtn == "") return "-"
+    return rtn 
 }
 
 export function getFEN(board, currentPlayer, RKMoved, EPTarget, halfMove, fullMove) {
@@ -263,7 +271,6 @@ export function getFEN(board, currentPlayer, RKMoved, EPTarget, halfMove, fullMo
     return fen
 }
 
-
 export async function API(FEN, setResponse) {
     console.log(FEN)
     let endpoint = "https://explorer.lichess.ovh/lichess" + "?fen=" + FEN + "&ratings=1000"
@@ -277,4 +284,10 @@ export async function API(FEN, setResponse) {
     .catch((error) => {
         console.error('Error:', error);
     });
+}
+
+export function parsePos(uci) {
+    let first = uci.substr(0, 2)
+    let second = uci.substr(2, 4)
+    return [[Math.abs(Number(first[1]) - 8), first.charCodeAt(0) - 97], [Math.abs(Number(second[1]) - 8), second.charCodeAt(0) - 97]]
 }

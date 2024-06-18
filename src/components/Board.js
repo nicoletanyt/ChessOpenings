@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import "../App.css"
-import { pieces, startingBoard, isLegal, isOccupied, isCheck, isPinned, checkAll } from '../logic'
+import { pieces, startingBoard, isLegal, isOccupied, isCheck, isPinned, checkAll, API, getFEN, parsePos } from '../logic'
 
-export default function Board({currentPlayer, setCurrentPlayer, setBlackTaken, setWhiteTaken, RKMoved, setRKMoved, EPTarget, setEPTarget, setHalfMove, setFullMove}) {
+export default function Board({currentPlayer, setCurrentPlayer, setBlackTaken, setWhiteTaken, RKMoved, setRKMoved, EPTarget, setEPTarget, halfMove, setHalfMove, fullMove, setFullMove, response, setResponse}) {
     // keeps track of the states 
     const [selectedPieces, setSelectedPieces] = useState([]) // sets the [x, y] position of the current selected piece
     const [king, setKing] = useState([[0, 4], [7, 4]]) // b, w
@@ -32,6 +32,18 @@ export default function Board({currentPlayer, setCurrentPlayer, setBlackTaken, s
         }
 
     }, [])
+
+    useEffect(() => {
+        API(getFEN(document.querySelectorAll(".cell"),currentPlayer,RKMoved,EPTarget,halfMove,fullMove), setResponse)
+    }, [currentPlayer])
+
+    useEffect(() => {
+        if (response && currentPlayer == "b") {
+            console.log(response)
+            // move 
+            if (response.moves.length > 0) setSelectedPieces(parsePos(response.moves[0].uci))
+          }
+    }, [response])
 
     // check move
     useEffect(() => {
