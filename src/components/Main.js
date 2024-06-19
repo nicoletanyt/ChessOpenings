@@ -1,9 +1,9 @@
-import "./App.css";
-import Board from "./components/Board";
+import "../App.css";
+import Board from "./Board";
 import { useEffect, useState } from "react";
-import { pieces, API, getFEN } from "./logic";
+import { pieces, API, getFEN } from "../logic";
 
-function App() {
+function Main() {
   const [currentPlayer, setCurrentPlayer] = useState("w"); // white starts
   const [blackTaken, setBlackTaken] = useState([]); // store pieces taken by black
   const [whiteTaken, setWhiteTaken] = useState([]); // store pieces taken by white
@@ -54,7 +54,7 @@ function App() {
   }, [response]);
 
   function selectPiece(e) {
-    setPromoPiece(e.target.getAttribute("pieceId"))
+    setPromoPiece(e.target.getAttribute("pieceid"))
   }
 
   return (
@@ -116,10 +116,10 @@ function App() {
         <div id="selection-wrapper" style={{visibility:"hidden"}}>
           <h3>Select pawn promotion piece</h3>
           <div id="selection-options">
-            <p onClick={(e) => selectPiece(e)} pieceId={currentPlayer == "b" ? "bb" : "wb"}>{currentPlayer == "b" ? pieces["bb"] : pieces["wb"]}</p>
-            <p onClick={(e) => selectPiece(e)} pieceId={currentPlayer == "b" ? "br" : "wr"}>{currentPlayer == "b" ? pieces["br"] : pieces["wr"]}</p>
-            <p onClick={(e) => selectPiece(e)} pieceId={currentPlayer == "b" ? "bq" : "wq"}>{currentPlayer == "b" ? pieces["bq"] : pieces["wq"]}</p>
-            <p onClick={(e) => selectPiece(e)} pieceId={currentPlayer == "b" ? "bn" : "wn"}>{currentPlayer == "b" ? pieces["bn"] : pieces["wn"]}</p>
+            <p onClick={(e) => selectPiece(e)} pieceid={currentPlayer == "b" ? "bb" : "wb"}>{currentPlayer == "b" ? pieces["bb"] : pieces["wb"]}</p>
+            <p onClick={(e) => selectPiece(e)} pieceid={currentPlayer == "b" ? "br" : "wr"}>{currentPlayer == "b" ? pieces["br"] : pieces["wr"]}</p>
+            <p onClick={(e) => selectPiece(e)} pieceid={currentPlayer == "b" ? "bq" : "wq"}>{currentPlayer == "b" ? pieces["bq"] : pieces["wq"]}</p>
+            <p onClick={(e) => selectPiece(e)} pieceid={currentPlayer == "b" ? "bn" : "wn"}>{currentPlayer == "b" ? pieces["bn"] : pieces["wn"]}</p>
           </div>
         </div>
       </div>
@@ -127,4 +127,4 @@ function App() {
   );
 }
 
-export default App;
+export default Main;

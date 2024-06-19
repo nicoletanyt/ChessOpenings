@@ -1,6 +1,6 @@
-/* APP.js */
+/* Main.js */
 #app {
-  height: 100vh;
+  height: 90vh;
   width: 100vw;
   display: flex;
   justify-content: center;
@@ -49,4 +49,18 @@
 }
 .under-check {
   background-color: red !important;
+}
+
+/* Navbar.js */
+#navbar {
+  display: flex;
+  justify-content: space-around;
+  padding: 2%;
+  padding-bottom: 0;
+}
+
+/* Openings.js */
+#opening-wrapper {
+  padding: 5%;
+
 }

@@ -32,7 +32,7 @@ export function isLegal(pieceId, currentPos, previousPos) {
     let displace_x = Math.abs(currentPos[1] - previousPos[1]) 
     let displace_y = Math.abs(currentPos[0] - previousPos[0]) 
     const board = document.querySelectorAll(".cell")
-    const secondPieceId = board[currentPos[0] * 8 + currentPos[1]].getAttribute("pieceId")
+    const secondPieceId = board[currentPos[0] * 8 + currentPos[1]].getAttribute("pieceid")
 
     switch(pieceId) {
         case "wk":
@@ -73,12 +73,12 @@ export function isLegal(pieceId, currentPos, previousPos) {
 
 export function isOccupied(currentPos, previousPos, currentPlayer, prevPieceId, board, RKMoved) {
     // const board = document.querySelectorAll(".cell")
-    const pieceId = board[currentPos[0] * 8 + currentPos[1]].getAttribute("pieceId")
+    const pieceId = board[currentPos[0] * 8 + currentPos[1]].getAttribute("pieceid")
     let obstruction = false
     let displacement = [currentPos[0] - previousPos[0], currentPos[1] - previousPos[1]]
 
     let previousPiece
-    if (prevPieceId == undefined || prevPieceId.length == 0) previousPiece = board[previousPos[0] * 8 + previousPos[1]].getAttribute("pieceId")[1]
+    if (prevPieceId == undefined || prevPieceId.length == 0) previousPiece = board[previousPos[0] * 8 + previousPos[1]].getAttribute("pieceid")[1]
     else previousPiece = prevPieceId[1]
     if (previousPiece == "q") {
         // the queen is moving like a rook 
@@ -92,13 +92,13 @@ export function isOccupied(currentPos, previousPos, currentPlayer, prevPieceId, 
                 // rook is moving horizontally 
                 for (let i = Math.min(currentPos[1], previousPos[1]) + 1; i < Math.max(currentPos[1], previousPos[1]); ++i) {
                     // there is a piece obstructing. (colour doesn't matter)
-                    if (board[currentPos[0] * 8 + i].getAttribute("pieceId") != "") obstruction = true
+                    if (board[currentPos[0] * 8 + i].getAttribute("pieceid") != "") obstruction = true
                 }
             } else {
                 // rook is moving vertically 
                 for (let i = Math.min(currentPos[0], previousPos[0]) + 1; i < Math.max(currentPos[0], previousPos[0]); ++i) {
                     // there is a piece obstructing. (colour doesn't matter)
-                    if (board[i * 8 + currentPos[1]].getAttribute("pieceId") != "") obstruction = true
+                    if (board[i * 8 + currentPos[1]].getAttribute("pieceid") != "") obstruction = true
                 }
             }
             break
@@ -106,12 +106,12 @@ export function isOccupied(currentPos, previousPos, currentPlayer, prevPieceId, 
             // get direction of displacement in the 4 directions of a bishop e.g. [-1, 1], [1, -1]
             let direction = [displacement[0] / Math.abs(displacement[0]), displacement[1] / Math.abs(displacement[1])]
             for (let i = 1; i < Math.abs(displacement[0]); ++i) {
-                if (board[(direction[0] * i + previousPos[0]) * 8 + (direction[1] * i + previousPos[1])].getAttribute("pieceId") != "") obstruction = true
+                if (board[(direction[0] * i + previousPos[0]) * 8 + (direction[1] * i + previousPos[1])].getAttribute("pieceid") != "") obstruction = true
             }
             break
         case "p":
             for (let i = Math.min(currentPos[0], previousPos[0]) + 1; i < Math.max(currentPos[0], previousPos[0]); ++i) {
-                if (board[i * 8 + currentPos[1]].getAttribute("pieceId") != "") {
+                if (board[i * 8 + currentPos[1]].getAttribute("pieceid") != "") {
                     obstruction = true 
                 }
             }
@@ -165,17 +165,17 @@ export function isPinned(pieceId, currentPos, previousPos, currentPlayer, king) 
     const board = document.querySelectorAll(".cell")
     let boardCopy = deepClone(board)
 
-    if (boardCopy[previousPos[0] * 8 + previousPos[1]].getAttribute("pieceId")[1] == "k") {
+    if (boardCopy[previousPos[0] * 8 + previousPos[1]].getAttribute("pieceid")[1] == "k") {
         return true
     }
 
-    boardCopy[previousPos[0] * 8 + previousPos[1]].setAttribute("pieceId", "")
-    boardCopy[currentPos[0] * 8 + currentPos[1]].setAttribute("pieceId", pieceId)
+    boardCopy[previousPos[0] * 8 + previousPos[1]].setAttribute("pieceid", "")
+    boardCopy[currentPos[0] * 8 + currentPos[1]].setAttribute("pieceid", pieceId)
     
     // check if in this scenario (where the current piece has moved) will result in a check for all possible opponent pieces
     for (let i = 0; i < boardCopy.length; ++i) {
-        if (opponentPieces.includes(boardCopy[i].getAttribute("pieceId"))) {
-            if (isCheck(boardCopy[i].getAttribute("pieceId"), [Math.floor(i/8), i%8], currentPlayer == "w" ? "b" : "w", king, boardCopy)) {
+        if (opponentPieces.includes(boardCopy[i].getAttribute("pieceid"))) {
+            if (isCheck(boardCopy[i].getAttribute("pieceid"), [Math.floor(i/8), i%8], currentPlayer == "w" ? "b" : "w", king, boardCopy)) {
                 console.log(currentPos)
                 console.log("Will result in a check => is pinned")
                 return false
@@ -190,13 +190,13 @@ export function checkAll(pieceId, currentPos, previousPos, currentPlayer, king) 
     let opponent = currentPlayer == "w" ? "b" : "w";
 
     let boardCopy = deepClone(board)
-    boardCopy[previousPos[0] * 8 + previousPos[1]].setAttribute("pieceId", "")
-    boardCopy[currentPos[0] * 8 + currentPos[1]].setAttribute("pieceId", pieceId)
+    boardCopy[previousPos[0] * 8 + previousPos[1]].setAttribute("pieceid", "")
+    boardCopy[currentPos[0] * 8 + currentPos[1]].setAttribute("pieceid", pieceId)
 
     for (let i = 0; i < boardCopy.length; ++i) {
-        if (boardCopy[i].getAttribute("pieceId")[0] == opponent) {
+        if (boardCopy[i].getAttribute("pieceid")[0] == opponent) {
             // can be captured
-            if (isCheck(boardCopy[i].getAttribute("pieceId"), [Math.floor(i/8), i%8], opponent, king, boardCopy)) {
+            if (isCheck(boardCopy[i].getAttribute("pieceid"), [Math.floor(i/8), i%8], opponent, king, boardCopy)) {
                 console.log([Math.floor(i/8), i%8])
                 console.log("There is still an ongoing check.")
                 return true
@@ -244,7 +244,7 @@ export function getFEN(board, currentPlayer, RKMoved, EPTarget, halfMove, fullMo
     let fen = "", spaceCounter = 0, pieceId = ""
 
     for (let i = 0; i < board.length; ++i) {
-        pieceId = board[i].getAttribute("pieceId")
+        pieceId = board[i].getAttribute("pieceid")
         if (pieceId == "") spaceCounter++
         else {
             if (spaceCounter != 0) {

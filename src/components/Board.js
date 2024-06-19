@@ -21,7 +21,7 @@ export default function Board({currentPlayer, setCurrentPlayer, setBlackTaken, s
                 cell.classList.add("cell")
                 let pieceId = startingBoard[Math.floor(i / 8)][i % 8]
                 cell.textContent = pieces[pieceId]
-                cell.setAttribute("pieceId", pieceId)
+                cell.setAttribute("pieceid", pieceId)
                 cell.addEventListener("click", () => movePiece([Math.floor(i/8), i % 8]))
                 // style chessboard pattern
                 if (Math.floor(i/8) % 2 == 0 && i % 2 == 1 || Math.floor(i/8) % 2 == 1 && i % 2 == 0) {
@@ -48,7 +48,7 @@ export default function Board({currentPlayer, setCurrentPlayer, setBlackTaken, s
     useEffect(() => {
         const board = document.querySelectorAll(".cell")
         if (promoPiece) {
-            let secondPieceId = board[selectedPieces[1][0] * 8 + selectedPieces[1][1]].getAttribute("pieceId")
+            let secondPieceId = board[selectedPieces[1][0] * 8 + selectedPieces[1][1]].getAttribute("pieceid")
             // take piece
             if (secondPieceId != "") {
                 // this piece will be taken
@@ -65,10 +65,10 @@ export default function Board({currentPlayer, setCurrentPlayer, setBlackTaken, s
             }
 
             board[selectedPieces[0][0] * 8 + selectedPieces[0][1]].textContent = ""
-            board[selectedPieces[0][0] * 8 + selectedPieces[0][1]].setAttribute("pieceId", "") 
+            board[selectedPieces[0][0] * 8 + selectedPieces[0][1]].setAttribute("pieceid", "") 
     
             board[selectedPieces[1][0] * 8 + selectedPieces[1][1]].textContent = pieces[promoPiece]
-            board[selectedPieces[1][0] * 8 + selectedPieces[1][1]].setAttribute("pieceId", promoPiece)
+            board[selectedPieces[1][0] * 8 + selectedPieces[1][1]].setAttribute("pieceid", promoPiece)
     
             document.getElementById("selection-wrapper").style.visibility = "hidden"
             setSelectedPieces([]) 
@@ -80,13 +80,13 @@ export default function Board({currentPlayer, setCurrentPlayer, setBlackTaken, s
     useEffect(() => {
         const board = document.querySelectorAll(".cell")
 
-        if (selectedPieces.length == 1 && board[selectedPieces[0][0] * 8 + selectedPieces[0][1]].getAttribute("pieceId")[0] == currentPlayer){
+        if (selectedPieces.length == 1 && board[selectedPieces[0][0] * 8 + selectedPieces[0][1]].getAttribute("pieceid")[0] == currentPlayer){
             board[selectedPieces[0][0] * 8 + selectedPieces[0][1]].classList.add("selected");
         }
 
         if (selectedPieces.length == 2) {
-            const pieceId = board[selectedPieces[0][0] * 8 + selectedPieces[0][1]].getAttribute("pieceId")
-            const secondPieceId = board[selectedPieces[1][0] * 8 + selectedPieces[1][1]].getAttribute("pieceId")
+            const pieceId = board[selectedPieces[0][0] * 8 + selectedPieces[0][1]].getAttribute("pieceid")
+            const secondPieceId = board[selectedPieces[1][0] * 8 + selectedPieces[1][1]].getAttribute("pieceid")
             if ((pieceId[0] == currentPlayer)) {
                 if (selectedPieces[0] != selectedPieces[1] && isLegal(pieceId, selectedPieces[1], selectedPieces[0]) && isOccupied(selectedPieces[1], selectedPieces[0], currentPlayer, "", board, RKMoved) && isPinned(pieceId, selectedPieces[1], selectedPieces[0], currentPlayer, king)) {
                     let validMove = true
@@ -168,31 +168,31 @@ export default function Board({currentPlayer, setCurrentPlayer, setBlackTaken, s
                             // castle queenside
                             if (selectedPieces[1][1] == 0) {
                                 board[selectedPieces[0][0] * 8 + 2].textContent = pieces[pieceId] // king 
-                                board[selectedPieces[0][0] * 8 + 2].setAttribute("pieceId", pieceId) 
+                                board[selectedPieces[0][0] * 8 + 2].setAttribute("pieceid", pieceId) 
                                 // rook
                                 board[selectedPieces[1][0] * 8 + 3].textContent = pieces[secondPieceId]
-                                board[selectedPieces[1][0] * 8 + 3].setAttribute("pieceId", secondPieceId)
+                                board[selectedPieces[1][0] * 8 + 3].setAttribute("pieceid", secondPieceId)
                             } else {
                                 // castle kingside 
                                 board[selectedPieces[0][0] * 8 + 6].textContent = pieces[pieceId]
-                                board[selectedPieces[0][0] * 8 + 6].setAttribute("pieceId", pieceId)
+                                board[selectedPieces[0][0] * 8 + 6].setAttribute("pieceid", pieceId)
 
                                 board[selectedPieces[1][0] * 8 + 5].textContent = pieces[secondPieceId]
-                                board[selectedPieces[1][0] * 8 + 5].setAttribute("pieceId", secondPieceId)
+                                board[selectedPieces[1][0] * 8 + 5].setAttribute("pieceid", secondPieceId)
                             }
                             // remove king 
                             board[selectedPieces[0][0] * 8 + selectedPieces[0][1]].textContent = ""
-                            board[selectedPieces[0][0] * 8 + selectedPieces[0][1]].setAttribute("pieceId", "")
+                            board[selectedPieces[0][0] * 8 + selectedPieces[0][1]].setAttribute("pieceid", "")
 
                             // remove rook 
                             board[selectedPieces[1][0] * 8 + selectedPieces[1][1]].textContent = ""
-                            board[selectedPieces[1][0] * 8 + selectedPieces[1][1]].setAttribute("pieceId", "")
+                            board[selectedPieces[1][0] * 8 + selectedPieces[1][1]].setAttribute("pieceid", "")
                         } else {
                             board[selectedPieces[0][0] * 8 + selectedPieces[0][1]].textContent = ""
-                            board[selectedPieces[0][0] * 8 + selectedPieces[0][1]].setAttribute("pieceId", "")
+                            board[selectedPieces[0][0] * 8 + selectedPieces[0][1]].setAttribute("pieceid", "")
         
                             board[selectedPieces[1][0] * 8 + selectedPieces[1][1]].textContent = pieces[pieceId]
-                            board[selectedPieces[1][0] * 8 + selectedPieces[1][1]].setAttribute("pieceId", pieceId)
+                            board[selectedPieces[1][0] * 8 + selectedPieces[1][1]].setAttribute("pieceid", pieceId)
                         }
 
                         if (secondPieceId != "") {
