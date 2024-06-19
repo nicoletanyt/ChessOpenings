@@ -49,7 +49,7 @@ export function isLegal(pieceId, currentPos, previousPos) {
             if (startingBoard[previousPos[0]][previousPos[1]] == "wp") {
                 // pawn has not moved, can either move up one or two squares
                 if (currentPos[0] < previousPos[0] && previousPos[0] - currentPos[0] <= 2) return true
-            } else if (previousPos[0] - currentPos[0] == 1) return true
+            } else if (previousPos[0] - currentPos[0] == 1 && displace_x <= 1) return true
             return false
         case "bk":
             return (displace_x <= 1 && displace_y <= 1) || (secondPieceId == "br")
@@ -65,7 +65,7 @@ export function isLegal(pieceId, currentPos, previousPos) {
             if (startingBoard[previousPos[0]][previousPos[1]] == "bp") {
                 // pawn has not moved, can either move down one or two squares
                 if (currentPos[0] > previousPos[0] && currentPos[0] - previousPos[0] <= 2) return true
-            } else if (currentPos[0] - previousPos[0] == 1) return true
+            } else if (currentPos[0] - previousPos[0] == 1 && displace_x <= 1) return true
             return false
 
     }
@@ -111,13 +111,15 @@ export function isOccupied(currentPos, previousPos, currentPlayer, prevPieceId, 
             break
         case "p":
             for (let i = Math.min(currentPos[0], previousPos[0]) + 1; i < Math.max(currentPos[0], previousPos[0]); ++i) {
-                if (board[i * 8 + currentPos[1]].getAttribute("pieceId") != "") obstruction = true
+                if (board[i * 8 + currentPos[1]].getAttribute("pieceId") != "") {
+                    obstruction = true 
+                }
             }
             // pawn cannot take forwards
             if (displacement[1] == 0) {
                 if (pieceId != "") obstruction = true 
             } 
-            if (displacement[0] != 0 && displacement[1] != 0) {
+            if (Math.abs(displacement[0]) == 1 && Math.abs(displacement[1]) == 1) {
                 // diagonal, so can take. obstruction if there is no piece at the diagonal square. unless en passant
                 if (pieceId == "") obstruction = true
             }
@@ -147,8 +149,7 @@ export function isOccupied(currentPos, previousPos, currentPlayer, prevPieceId, 
 
 export function isCheck(pieceId, currentPos, currentPlayer, king, board) {
     let kingPos = currentPlayer == "w" ? king[0] : king[1];
-
-    // check if this current move results in a check
+    // check if this current move results in a check   
     if (isLegal(pieceId, kingPos, currentPos) && isOccupied(kingPos, currentPos, currentPlayer, pieceId, board)) {
         console.log("Check")
         return true
@@ -164,7 +165,6 @@ export function isPinned(pieceId, currentPos, previousPos, currentPlayer, king) 
     const board = document.querySelectorAll(".cell")
     let boardCopy = deepClone(board)
 
-    console.log(boardCopy[previousPos[0] * 8 + previousPos[1]].getAttribute("pieceId"))
     if (boardCopy[previousPos[0] * 8 + previousPos[1]].getAttribute("pieceId")[1] == "k") {
         return true
     }
@@ -197,6 +197,7 @@ export function checkAll(pieceId, currentPos, previousPos, currentPlayer, king) 
         if (boardCopy[i].getAttribute("pieceId")[0] == opponent) {
             // can be captured
             if (isCheck(boardCopy[i].getAttribute("pieceId"), [Math.floor(i/8), i%8], opponent, king, boardCopy)) {
+                console.log([Math.floor(i/8), i%8])
                 console.log("There is still an ongoing check.")
                 return true
             }
@@ -253,7 +254,7 @@ export function getFEN(board, currentPlayer, RKMoved, EPTarget, halfMove, fullMo
             if (pieceId[0] == "b") fen += pieceId[1]
             else fen += pieceId[1].toUpperCase()
         }
-        if (i % 8 == 7 && i != 63) {
+        if (i % 8 == 7) {
             if (spaceCounter != 0) {
                 fen += spaceCounter.toString()
                 spaceCounter = 0

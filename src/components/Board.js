@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import "../App.css"
 import { pieces, startingBoard, isLegal, isOccupied, isCheck, isPinned, checkAll, API, getFEN, parsePos } from '../logic'
 
-export default function Board({currentPlayer, setCurrentPlayer, setBlackTaken, setWhiteTaken, RKMoved, setRKMoved, EPTarget, setEPTarget, halfMove, setHalfMove, fullMove, setFullMove, response, setResponse}) {
+export default function Board({currentPlayer, setCurrentPlayer, setBlackTaken, setWhiteTaken, RKMoved, setRKMoved, EPTarget, setEPTarget, halfMove, setHalfMove, fullMove, setFullMove, response, setResponse, promoPiece}) {
     // keeps track of the states 
     const [selectedPieces, setSelectedPieces] = useState([]) // sets the [x, y] position of the current selected piece
     const [king, setKing] = useState([[0, 4], [7, 4]]) // b, w
@@ -44,6 +44,37 @@ export default function Board({currentPlayer, setCurrentPlayer, setBlackTaken, s
             if (response.moves.length > 0) setSelectedPieces(parsePos(response.moves[0].uci))
           }
     }, [response])
+
+    useEffect(() => {
+        const board = document.querySelectorAll(".cell")
+        if (promoPiece) {
+            let secondPieceId = board[selectedPieces[1][0] * 8 + selectedPieces[1][1]].getAttribute("pieceId")
+            // take piece
+            if (secondPieceId != "") {
+                // this piece will be taken
+                if (currentPlayer == "w") setWhiteTaken(whiteTaken => [...whiteTaken, secondPieceId])
+                else setBlackTaken(blackTaken => [...blackTaken, secondPieceId])
+            } 
+            setHalfMove(0)
+
+            // set current player
+            if (currentPlayer == "w") setCurrentPlayer("b")
+            else {
+                setCurrentPlayer("w")
+                setFullMove(fullMove => (fullMove + 1))
+            }
+
+            board[selectedPieces[0][0] * 8 + selectedPieces[0][1]].textContent = ""
+            board[selectedPieces[0][0] * 8 + selectedPieces[0][1]].setAttribute("pieceId", "") 
+    
+            board[selectedPieces[1][0] * 8 + selectedPieces[1][1]].textContent = pieces[promoPiece]
+            board[selectedPieces[1][0] * 8 + selectedPieces[1][1]].setAttribute("pieceId", promoPiece)
+    
+            document.getElementById("selection-wrapper").style.visibility = "hidden"
+            setSelectedPieces([]) 
+            board[selectedPieces[0][0] * 8 + selectedPieces[0][1]].classList.remove("selected")
+        }
+    }, [promoPiece])
 
     // check move
     useEffect(() => {
@@ -114,12 +145,21 @@ export default function Board({currentPlayer, setCurrentPlayer, setBlackTaken, s
                         }
 
                         if (EPTarget) setEPTarget("-") 
-                        if (pieceId[1] == "p" && Math.abs(selectedPieces[1][0] - selectedPieces[0][0]) == 2) {
-                            // set en passant target
-                            if (pieceId[0] == "wp") {
-                                setEPTarget(String.fromCharCode(97 + selectedPieces[1][0]) + "6")
-                            } else {
-                                setEPTarget(String.fromCharCode(97 + selectedPieces[1][0]) + "3")
+                        if (pieceId[1] == "p") {
+                            if (Math.abs(selectedPieces[1][0] - selectedPieces[0][0]) == 2) {
+                                // set en passant target
+                                if (pieceId[0] == "wp") {
+                                    setEPTarget(String.fromCharCode(97 + selectedPieces[1][0]) + "6")
+                                } else {
+                                    setEPTarget(String.fromCharCode(97 + selectedPieces[1][0]) + "3")
+                                }
+                            }
+
+                            if (selectedPieces[1][0] == 0 || selectedPieces[1][0] == 7) {
+                                // pawn promotion 
+                                console.log("pawn promotion")
+                                document.getElementById("selection-wrapper").style.visibility = "visible"
+                                return;
                             }
                         }
 

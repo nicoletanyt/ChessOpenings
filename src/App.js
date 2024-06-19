@@ -12,6 +12,7 @@ function App() {
   const [halfMove, setHalfMove] = useState(0);
   const [fullMove, setFullMove] = useState(1);
   const [response, setResponse] = useState(null);
+  const [promoPiece, setPromoPiece] = useState(null)
 
   useEffect(() => {
     const label = document.getElementById("player-display");
@@ -52,6 +53,10 @@ function App() {
     
   }, [response]);
 
+  function selectPiece(e) {
+    setPromoPiece(e.target.getAttribute("pieceId"))
+  }
+
   return (
     <div id="app">
       <div id="number-label">
@@ -76,6 +81,7 @@ function App() {
           setFullMove={setFullMove}
           response={response}
           setResponse={setResponse}
+          promoPiece={promoPiece}
         />
         <div id="letter-label">
           {"abcdefgh".split("").map((letter) => (
@@ -105,6 +111,17 @@ function App() {
         </button>
         <p id="white-next">Most common move for white: </p>
         <p id="opening">Current Opening: </p>
+        <br/>
+        <hr/>
+        <div id="selection-wrapper" style={{visibility:"hidden"}}>
+          <h3>Select pawn promotion piece</h3>
+          <div id="selection-options">
+            <p onClick={(e) => selectPiece(e)} pieceId={currentPlayer == "b" ? "bb" : "wb"}>{currentPlayer == "b" ? pieces["bb"] : pieces["wb"]}</p>
+            <p onClick={(e) => selectPiece(e)} pieceId={currentPlayer == "b" ? "br" : "wr"}>{currentPlayer == "b" ? pieces["br"] : pieces["wr"]}</p>
+            <p onClick={(e) => selectPiece(e)} pieceId={currentPlayer == "b" ? "bq" : "wq"}>{currentPlayer == "b" ? pieces["bq"] : pieces["wq"]}</p>
+            <p onClick={(e) => selectPiece(e)} pieceId={currentPlayer == "b" ? "bn" : "wn"}>{currentPlayer == "b" ? pieces["bn"] : pieces["wn"]}</p>
+          </div>
+        </div>
       </div>
     </div>
   );
