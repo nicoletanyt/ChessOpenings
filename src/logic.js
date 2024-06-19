@@ -287,6 +287,23 @@ export async function API(FEN, setResponse) {
     });
 }
 
+export async function openingAPI(rating, setOpening) {
+    const endpoint = "https://explorer.lichess.ovh/lichess?variant=standard&ratings=" + rating + "&fen=rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR%20w%20KQkq%20-%200%201"
+
+    // uses the most common moves at that rating to find openings with those moves
+    const response = await fetch(endpoint);
+    const data = await response.json();
+    let arr = [];
+
+    for (let i = 0; i < 10; ++i) {
+        const res = await fetch(endpoint + "&play=" + data.moves[i].uci);
+        const d = await res.json();
+        arr.push(d)
+    }
+
+    setOpening(arr)
+}
+
 export function parsePos(uci) {
     let first = uci.substr(0, 2)
     let second = uci.substr(2, 4)

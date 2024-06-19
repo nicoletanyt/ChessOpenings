@@ -5,10 +5,12 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  overflow: hidden;
 }
 #right-wrapper {
   padding: 2%;
   width: 30%;
+  height: 70vh;
 }
 #number-label {
   display: grid;
@@ -27,6 +29,13 @@
   grid-template-columns: repeat(4, 5vw);
   font-size: 4vw;
   cursor: default;
+}
+#opening-rec {
+  height: 40vh;
+  overflow-y: scroll;
+}
+.opening-item {
+  cursor: pointer;
 }
 
 
@@ -62,5 +71,4 @@
 /* Openings.js */
 #opening-wrapper {
   padding: 5%;
-
 }

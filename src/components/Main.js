@@ -1,7 +1,8 @@
 import "../App.css";
 import Board from "./Board";
 import { useEffect, useState } from "react";
-import { pieces, API, getFEN } from "../logic";
+import { pieces, API, getFEN, openingAPI } from "../logic";
+import OpeningItem from "./OpeningItem";
 
 function Main() {
   const [currentPlayer, setCurrentPlayer] = useState("w"); // white starts
@@ -13,6 +14,7 @@ function Main() {
   const [fullMove, setFullMove] = useState(1);
   const [response, setResponse] = useState(null);
   const [promoPiece, setPromoPiece] = useState(null)
+  const [opening, setOpening] = useState([])
 
   useEffect(() => {
     const label = document.getElementById("player-display");
@@ -39,16 +41,21 @@ function Main() {
   }, [whiteTaken]);
 
   useEffect(() => {
-    if (response && currentPlayer == "w") {
+    if (response) {
       console.log(response);
-      const whiteNext = document.getElementById("white-next")
-  
-      const opening = document.getElementById("opening")
-      
-      whiteNext.textContent = "Most common move for white: " + response.moves[0].san
-      if (response.opening) {
-        opening.textContent = "Opening: " + response.opening.name
+
+      if (currentPlayer == "w") {
+        const whiteNext = document.getElementById("white-next")
+        const opening = document.getElementById("opening")
+        
+        whiteNext.textContent = "Most common move for white: " + response.moves[0].san
+        if (response.opening) {
+          opening.textContent = "Opening: " + response.opening.name
+        }
       }
+      
+      // get common openings
+      openingAPI(1000, setOpening) // 1000 rating as placeholder
     }
     
   }, [response]);
@@ -56,6 +63,10 @@ function Main() {
   function selectPiece(e) {
     setPromoPiece(e.target.getAttribute("pieceid"))
   }
+
+  useEffect(() => {
+    opening.slice(0, 10)
+  }, [opening])
 
   return (
     <div id="app">
@@ -113,6 +124,16 @@ function Main() {
         <p id="opening">Current Opening: </p>
         <br/>
         <hr/>
+        <div>
+          <h3>Select an opening (ranked from most common to least): </h3>
+          <ol id="opening-rec">
+            {
+              opening.length == 10 && document.getElementById("opening-rec").childElementCount != 10 ? opening.map((op, index) => (
+                <OpeningItem opening={op} key={index}/>
+              )) : <></>
+            }
+          </ol>
+        </div>
         <div id="selection-wrapper" style={{visibility:"hidden"}}>
           <h3>Select pawn promotion piece</h3>
           <div id="selection-options">
